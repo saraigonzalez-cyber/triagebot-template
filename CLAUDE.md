@@ -32,6 +32,20 @@ del equipo que seas.
 4. `.env` nunca se commitea. Comprueba que está en `.gitignore` antes de tu
    primer commit.
 
+## Convenciones del Equipo B
+
+- La fuente de verdad funcional es `SPEC.md`; si algo cambia, se anota en su sección 13.
+- Dependencias entre módulos: `main` → `models`, `db`, `classifier`; `db` → `models`;
+  `classifier` → `openai`, `models`. `classifier.py` y `db.py` nunca importan FastAPI.
+- `main.py` llama al clasificador **vía módulo** (`from app import classifier` →
+  `classifier.classify_ticket(...)`), nunca con `from app.classifier import ...`:
+  si no, el `monkeypatch` de los tests no surte efecto.
+- SQL solo en `app/db.py`, siempre con parámetros `?`. Una conexión por operación.
+- `classify_ticket()` nunca lanza excepción: un reintento y luego fallback
+  `{"category": "question", "priority": "P3", "tags": []}`. Nunca loguear la API key.
+- HTML solo en `templates/`, con autoescape; nunca `|safe` con datos del usuario.
+- Ningún test llama al LLM real. Antes de dar algo por terminado: `pytest` y `ruff check .` en verde.
+
 ## Comandos útiles
 
 ```bash

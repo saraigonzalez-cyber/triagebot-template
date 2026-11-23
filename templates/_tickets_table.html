@@ -1,3 +1,4 @@
+<div class="overflow-x-auto">
 <table class="min-w-full divide-y divide-slate-200 bg-white shadow-sm ring-1 ring-slate-200 rounded-lg overflow-hidden">
   <thead class="bg-slate-100">
     <tr>
@@ -11,6 +12,7 @@
     </tr>
   </thead>
   <tbody id="tickets-table-body">
-    <!-- TODO: renderizar tickets con Jinja2 -->
+    {% include "_rows.html" %}
   </tbody>
 </table>
+</div>
