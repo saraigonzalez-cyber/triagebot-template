@@ -96,7 +96,7 @@ Los detalles obligatorios están en:
 
 ## Equipo
 
-Nombres: Sarai, Federidson, Antxon
+Nombres: Antxon, Sarai, Virginia, Federidson
 
 
 Metodología: `Spec-Driven`
