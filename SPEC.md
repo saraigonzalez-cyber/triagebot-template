@@ -387,6 +387,7 @@ los fijan sus `assert`.
 - `category: "URGENT"` o inventada → fallback.
 - El SDK lanza excepción dos veces → fallback, sin excepción hacia fuera.
 - Sin `OPENROUTER_API_KEY` → fallback sin llamar al SDK.
+- Sin la api key `OPENROUTER_API_KEY` es incorrecta → fallback, sin excepción hacia fuera.
 - `GET /tickets/99999` → `404`. `GET /tickets/abc` → `422`.
 - `PATCH` con `status: "inventado"` → `422`. `PATCH` a id inexistente → `404`.
 - `GET /` devuelve `200` con `text/html`.
