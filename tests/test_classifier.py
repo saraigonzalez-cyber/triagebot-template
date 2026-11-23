@@ -3,6 +3,8 @@
 import json
 from types import SimpleNamespace
 
+import httpx
+import openai
 import pytest
 
 from app import classifier
@@ -123,6 +125,23 @@ def test_missing_api_key_does_not_call_sdk(monkeypatch):
     monkeypatch.setattr(classifier, "OpenAI", FakeOpenAI)
     assert classifier.classify_ticket("t", "d") == FALLBACK
     assert FakeOpenAI.instances == []
+
+
+def _auth_error() -> openai.AuthenticationError:
+    request = httpx.Request("POST", f"{classifier.BASE_URL}/chat/completions")
+    response = httpx.Response(401, request=request)
+    return openai.AuthenticationError("Invalid API key", response=response, body=None)
+
+
+def test_invalid_api_key_returns_fallback(fake_llm, monkeypatch, caplog):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "clave-incorrecta")
+    fake_llm(_auth_error(), _auth_error())
+    with caplog.at_level("WARNING"):
+        result = classifier.classify_ticket("t", "d")
+    assert result == FALLBACK
+    assert total_calls() == 2
+    assert FakeOpenAI.instances[0].kwargs["api_key"] == "clave-incorrecta"
+    assert "clave-incorrecta" not in caplog.text
 
 
 def test_fallback_is_a_fresh_copy(monkeypatch):
