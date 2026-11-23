@@ -71,7 +71,10 @@ def classify_ticket(title: str, description: str) -> dict:
         return fallback()
 
     try:
-        client = OpenAI(base_url=BASE_URL, api_key=api_key, timeout=TIMEOUT_SECONDS)
+        # max_retries=0: el único reintento es el de nuestro bucle (SPEC §6).
+        client = OpenAI(
+            base_url=BASE_URL, api_key=api_key, timeout=TIMEOUT_SECONDS, max_retries=0
+        )
     except Exception as exc:
         logger.warning(
             "Clasificador: no se pudo crear el cliente (%s); fallback", type(exc).__name__

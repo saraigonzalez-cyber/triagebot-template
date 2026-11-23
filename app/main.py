@@ -105,7 +105,7 @@ def create_ticket(payload: TicketCreate, request: Request):
         classification = classifier.classify_ticket(payload.title, payload.description)
     except Exception as exc:
         logger.warning("Clasificador lanzó %s; se usa el fallback", type(exc).__name__)
-        classification = dict(classifier.FALLBACK_CLASSIFICATION, tags=[])
+        classification = classifier.fallback()
 
     ticket = db.insert_ticket(payload.title, payload.description, classification)
     if is_htmx(request):

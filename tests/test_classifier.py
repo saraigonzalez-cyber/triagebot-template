@@ -60,6 +60,7 @@ def test_valid_response(fake_llm):
     assert "Título: Login roto" in call["messages"][1]["content"]
     assert FakeOpenAI.instances[0].kwargs["base_url"] == "https://openrouter.ai/api/v1"
     assert FakeOpenAI.instances[0].kwargs["timeout"] == 20
+    assert FakeOpenAI.instances[0].kwargs["max_retries"] == 0
 
 
 def test_response_wrapped_in_markdown_fence(fake_llm):
