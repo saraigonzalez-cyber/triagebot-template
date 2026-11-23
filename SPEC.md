@@ -241,7 +241,7 @@ resto del código depende solo de su contrato.
 ```python
 def classify_ticket(title: str, description: str) -> dict:
     """
-    Clasifica un ticket usando el LLM.
+    Clasifica un ticket usando el LLM. 
 
     Devuelve SIEMPRE un dict con esta forma exacta (nunca None, nunca excepción):
     {
