@@ -455,4 +455,11 @@ el README) con fecha y motivo. Ejemplo:
 
 | Fecha | Decisión | Motivo |
 |-------|----------|--------|
-| | | |
+| 2026-11-23 | `db.py` acepta `DATABASE_URL` (`sqlite:///ruta`, prioritaria) además de `TRIAGEBOT_DB`, y resuelve la ruta en cada operación | Los tests de aceptación aíslan la BD con `DATABASE_URL`, fijada después de importar la app |
+| 2026-11-23 | Cada conexión ejecuta `CREATE TABLE IF NOT EXISTS` (además de `init_db()` en el lifespan) | Los tests usan `TestClient(app)` sin `with`, así que el arranque de FastAPI no se ejecuta |
+| 2026-11-23 | `main.py` envuelve `classifier.classify_ticket` en `try/except` y aplica el fallback | El test 4 sustituye el clasificador por uno que lanza excepción; el endpoint nunca debe dar 5xx |
+| 2026-11-23 | `_rows.html` (solo filas) se incluye desde `_tickets_table.html`, que ya venía en la plantilla | Reutilizar el fichero existente y cumplir el fragmento `_rows.html` de la spec |
+| 2026-11-23 | La respuesta HTMX a `POST /tickets` devuelve todas las filas (no solo la nueva) y los filtros se resetean | Así desaparece la fila "No hay tickets" y la tabla queda coherente sin JS extra |
+| 2026-11-23 | En `GET /tickets`, un filtro vacío (`?status=`) equivale a "sin filtro"; un valor fuera del enum da `422` | Los `<select>` envían `""` para la opción "Todos" |
+| 2026-11-23 | SQLite con `timeout=30` y `journal_mode=WAL` | 20 POST concurrentes sin errores de base de datos bloqueada (QA #10) |
+| 2026-11-23 | Workflow movido de `workflows/ci.yml` a `.github/workflows/ci.yml` | GitHub Actions solo lee esa ruta |

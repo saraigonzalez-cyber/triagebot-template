@@ -1,5 +1,106 @@
-# TODO: define aquí los modelos de dominio / schemas Pydantic.
+"""Modelos Pydantic (entrada, salida) y enums de TriageBot."""
 
-ALLOWED_CATEGORIES = {"bug", "feature_request", "question", "urgent"}
-ALLOWED_PRIORITIES = {"P1", "P2", "P3"}
-ALLOWED_STATUSES = {"open", "in_progress", "closed"}
+from enum import Enum
+from typing import Annotated, Any
+
+from pydantic import BaseModel, ConfigDict, StringConstraints, field_validator, model_validator
+
+
+class Category(str, Enum):
+    bug = "bug"
+    feature_request = "feature_request"
+    question = "question"
+    urgent = "urgent"
+
+
+class Priority(str, Enum):
+    P1 = "P1"
+    P2 = "P2"
+    P3 = "P3"
+
+
+class Status(str, Enum):
+    open = "open"
+    in_progress = "in_progress"
+    closed = "closed"
+
+
+ALLOWED_CATEGORIES = {c.value for c in Category}
+ALLOWED_PRIORITIES = {p.value for p in Priority}
+ALLOWED_STATUSES = {s.value for s in Status}
+
+MAX_TAGS = 5
+MAX_TAG_LENGTH = 30
+
+Title = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
+Description = Annotated[
+    str, StringConstraints(strip_whitespace=True, min_length=1, max_length=5000)
+]
+
+
+class TicketCreate(BaseModel):
+    title: Title
+    description: Description
+
+
+class TicketUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: Status | None = None
+    priority: Priority | None = None
+
+    @model_validator(mode="after")
+    def at_least_one_field(self) -> "TicketUpdate":
+        if self.status is None and self.priority is None:
+            raise ValueError("Debe indicarse al menos 'status' o 'priority'")
+        return self
+
+
+class Ticket(BaseModel):
+    id: int
+    title: str
+    description: str
+    category: Category
+    priority: Priority
+    tags: list[str]
+    status: Status
+    created_at: str
+    updated_at: str
+
+
+def normalize_tags(raw: list[Any]) -> list[str]:
+    """Minúscula, strip, recorte a 30 chars, sin vacíos ni duplicados, máx. 5."""
+    tags: list[str] = []
+    for item in raw:
+        if not isinstance(item, str):
+            continue
+        tag = item.strip().lower()[:MAX_TAG_LENGTH].strip()
+        if tag and tag not in tags:
+            tags.append(tag)
+        if len(tags) == MAX_TAGS:
+            break
+    return tags
+
+
+class Classification(BaseModel):
+    """Salida validada del clasificador. Los enums son estrictos (sin 'arreglos')."""
+
+    category: Category
+    priority: Priority
+    tags: list[str] = []
+
+    @field_validator("tags", mode="before")
+    @classmethod
+    def _normalize_tags(cls, value: Any) -> list[str]:
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            raise ValueError("tags debe ser una lista")
+        return normalize_tags(value)
+
+    def to_dict(self) -> dict:
+        return {
+            "category": self.category.value,
+            "priority": self.priority.value,
+            "tags": list(self.tags),
+        }

@@ -59,10 +59,12 @@ git status
 ## Ejecutar tests
 
 ```bash
-pytest -v
+pytest -v              # 5 tests de aceptación + tests propios (test_api.py, test_classifier.py)
+pytest --cov=app       # cobertura (objetivo ≥ 70 %)
+ruff check .           # lint
 ```
 
-Al clonar el repo plantilla, los tests de aceptación deben fallar. Eso es lo esperado: todavía no habéis implementado TriageBot.
+Ningún test llama al LLM real: el clasificador o el cliente de OpenAI se sustituyen con `monkeypatch`.
 
 ## Ejecutar la app
 
@@ -75,6 +77,29 @@ Abre:
 ```text
 http://127.0.0.1:8000
 ```
+
+Variables de entorno:
+
+| Variable | Obligatoria | Uso |
+|---|---|---|
+| `OPENROUTER_API_KEY` | Sí (para clasificar de verdad) | Sin ella, todos los tickets reciben el fallback `question / P3 / []`. |
+| `TRIAGEBOT_DB` | No | Ruta del archivo SQLite (por defecto `triagebot.db`). |
+| `DATABASE_URL` | No | Alternativa con formato `sqlite:///ruta` (la usan los tests); tiene prioridad sobre `TRIAGEBOT_DB`. |
+
+## Estructura
+
+```
+app/main.py        Endpoints FastAPI y render de plantillas (sin SQL ni LLM)
+app/models.py      Modelos Pydantic y enums
+app/db.py          Persistencia con sqlite3 (consultas parametrizadas)
+app/classifier.py  Única llamada al LLM; reintento + fallback
+templates/         index.html, _tickets_table.html, _rows.html (fragmento HTMX)
+tests/             test_acceptance.py (no se toca), test_api.py, test_classifier.py
+```
+
+## Decisiones del equipo
+
+Ver la tabla de la sección 13 de [`SPEC.md`](SPEC.md).
 
 ## Contrato mínimo del producto
 
