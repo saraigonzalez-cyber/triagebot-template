@@ -121,7 +121,7 @@ Los detalles obligatorios están en:
 
 ## Equipo
 
-Nombres: Antxon, Sarai, Virginia, Federidson
+Nombres: Antxon, Sarai, Virginia, Federidson, prueba
 
 
 Metodología: `Spec-Driven`

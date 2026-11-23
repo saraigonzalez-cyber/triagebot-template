@@ -391,6 +391,7 @@ los fijan sus `assert`.
 - `GET /tickets/99999` → `404`. `GET /tickets/abc` → `422`.
 - `PATCH` con `status: "inventado"` → `422`. `PATCH` a id inexistente → `404`.
 - `GET /` devuelve `200` con `text/html`.
+- `GET /aaaaaRRR` devuelve `404`
 
 Ningún test propio llama al LLM real.
 
