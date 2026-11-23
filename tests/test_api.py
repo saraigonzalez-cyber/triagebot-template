@@ -144,6 +144,10 @@ def test_index_empty_state(client):
     assert "No hay tickets" in client.get("/").text
 
 
+def test_unknown_route_returns_404(client):
+    assert client.get("/aaaaaRRR").status_code == 404
+
+
 def test_htmx_requests_return_html_rows(client):
     created = client.post(
         "/tickets", json={"title": "HTMX", "description": "desde la web"}, headers=HTMX
