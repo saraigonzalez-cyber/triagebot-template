@@ -88,6 +88,57 @@ def test_empty_filter_means_all(client):
     assert len(response.json()) == 1
 
 
+def titles(client, **params):
+    response = client.get("/tickets", params=params)
+    assert response.status_code == 200
+    return sorted(t["title"] for t in response.json())
+
+
+def test_title_filter_is_substring_and_case_insensitive(client):
+    create(client, "La página de LOGIN no carga")
+    create(client, "Exportar a PDF")
+    assert titles(client, title="login") == ["La página de LOGIN no carga"]
+    assert titles(client, title="ORTAR") == ["Exportar a PDF"]
+
+
+def test_title_filter_ignores_case_of_non_ascii_letters(client):
+    create(client, "PÁGINA caída")
+    assert titles(client, title="página") == ["PÁGINA caída"]
+
+
+def test_title_filter_treats_like_wildcards_literally(client):
+    create(client, "Descuento del 100% en pedidos")
+    create(client, "Error_500 en login")
+    create(client, "Otro ticket")
+    assert titles(client, title="100%") == ["Descuento del 100% en pedidos"]
+    assert titles(client, title="_500") == ["Error_500 en login"]
+    assert titles(client, title="%") == ["Descuento del 100% en pedidos"]
+
+
+def test_title_filter_combines_with_other_filters(client):
+    ticket = create(client, "Login roto")
+    create(client, "Login lento")
+    client.patch(f"/tickets/{ticket['id']}", json={"status": "closed"})
+    assert titles(client, title="login", status="closed") == ["Login roto"]
+    assert titles(client, title="login", category="question") == []
+
+
+def test_title_filter_empty_means_all_and_no_match_is_empty(client):
+    create(client, "Uno")
+    assert titles(client, title="") == ["Uno"]
+    assert titles(client, title="   ") == ["Uno"]
+    assert titles(client, title="zzz") == []
+
+
+def test_title_filter_with_htmx_returns_rows(client):
+    create(client, "Login roto")
+    create(client, "Otro")
+    response = client.get("/tickets", params={"title": "login"}, headers=HTMX)
+    assert response.status_code == 200
+    assert "Login roto" in response.text
+    assert "Otro" not in response.text
+
+
 def test_patch_updates_updated_at_only_allowed_fields(client):
     ticket = create(client)
     patched = client.patch(f"/tickets/{ticket['id']}", json={"status": "closed"})
