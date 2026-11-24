@@ -261,3 +261,18 @@ def test_stats_counts_by_category_priority_and_status(client):
     assert stats["by_priority"] == {"P1": 1, "P2": 0, "P3": 1}
     assert stats["by_status"]["open"] == 1
     assert stats["by_status"]["closed"] == 1
+
+
+def test_stats_htmx_returns_html_panel(client):
+    create(client, "Uno")
+    response = client.get("/tickets/stats", headers=HTMX)
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+    assert "Total" in response.text
+    assert "Abierto" in response.text
+
+
+def test_index_has_stats_button(client):
+    response = client.get("/")
+    assert 'hx-get="/tickets/stats"' in response.text
+    assert 'id="stats-panel"' in response.text

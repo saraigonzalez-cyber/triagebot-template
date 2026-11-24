@@ -1,0 +1,30 @@
+<div class="mt-3 grid gap-4 rounded-lg bg-zinc-900/80 p-4 shadow-lg shadow-red-950/40 ring-1 ring-red-900/60 sm:grid-cols-4">
+  <div>
+    <p class="text-sm font-medium text-zinc-400">Total</p>
+    <p class="font-creepy blood-glow text-4xl text-red-600">{{ stats.total }}</p>
+  </div>
+  <div>
+    <p class="text-sm font-medium text-zinc-400">Por categoría</p>
+    <ul class="mt-1 text-sm">
+      {% for key, count in stats.by_category.items() %}
+      <li class="flex justify-between gap-2"><span>{{ key }}</span><span class="font-semibold text-red-400">{{ count }}</span></li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div>
+    <p class="text-sm font-medium text-zinc-400">Por prioridad</p>
+    <ul class="mt-1 text-sm">
+      {% for key, count in stats.by_priority.items() %}
+      <li class="flex justify-between gap-2"><span>{{ key }}</span><span class="font-semibold text-red-400">{{ count }}</span></li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div>
+    <p class="text-sm font-medium text-zinc-400">Por estado</p>
+    <ul class="mt-1 text-sm">
+      {% for key, count in stats.by_status.items() %}
+      <li class="flex justify-between gap-2"><span>{{ status_labels.get(key, key) }}</span><span class="font-semibold text-red-400">{{ count }}</span></li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>

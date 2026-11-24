@@ -110,6 +110,18 @@
       </form>
     </section>
 
+    <!-- Estadísticas -->
+    <section class="mt-4">
+      <button type="button"
+              hx-get="/tickets/stats"
+              hx-target="#stats-panel"
+              hx-swap="innerHTML"
+              class="rounded bg-red-800 px-4 py-2 text-sm font-semibold text-green-300 shadow-md shadow-red-950 hover:bg-red-700">
+        Ver estadísticas
+      </button>
+      <div id="stats-panel"></div>
+    </section>
+
     <!-- Tablero -->
     <section class="mt-4">
       {% include "_tickets_table.html" %}

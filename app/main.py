@@ -157,14 +157,19 @@ def list_tickets(
 
 # Debe declararse antes de /tickets/{ticket_id}: si no, "stats" se trataría como id (422).
 @app.get("/tickets/stats", response_model=TicketStats)
-def ticket_stats():
+def ticket_stats(request: Request):
     raw = db.ticket_stats()
-    return {
+    stats = {
         "total": raw["total"],
         "by_category": {c.value: raw["category"].get(c.value, 0) for c in Category},
         "by_priority": {p.value: raw["priority"].get(p.value, 0) for p in Priority},
         "by_status": {s.value: raw["status"].get(s.value, 0) for s in Status},
     }
+    if is_htmx(request):
+        return templates.TemplateResponse(
+            request, "_stats.html", {"stats": stats, **TEMPLATE_CONTEXT}
+        )
+    return stats
 
 
 @app.get("/tickets/{ticket_id}", response_model=Ticket)
