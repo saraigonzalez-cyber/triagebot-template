@@ -54,6 +54,8 @@ def _now() -> str:
 def _connect() -> Iterator[sqlite3.Connection]:
     conn = sqlite3.connect(db_path(), timeout=30)
     conn.row_factory = sqlite3.Row
+    # LIKE de SQLite solo ignora mayúsculas en ASCII; esto cubre tildes y ñ.
+    conn.create_function("lower_u", 1, lambda s: s.lower() if isinstance(s, str) else s)
     try:
         conn.execute(SCHEMA)
         yield conn
@@ -102,12 +104,24 @@ def get_ticket(ticket_id: int) -> dict | None:
     return _row_to_dict(row) if row else None
 
 
+def _like_pattern(text: str) -> str:
+    """'%texto%' en minúscula, con %, _ y \\ escapados para buscarlos literalmente."""
+    escaped = text.lower().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return f"%{escaped}%"
+
+
 def list_tickets(
-    category: str | None = None, priority: str | None = None, status: str | None = None
+    category: str | None = None,
+    priority: str | None = None,
+    status: str | None = None,
+    title: str | None = None,
 ) -> list[dict]:
     values = {"category": category, "priority": priority, "status": status}
     clauses = [f"{col} = ?" for col in FILTER_COLUMNS if values[col] is not None]
     params = [values[col] for col in FILTER_COLUMNS if values[col] is not None]
+    if title is not None and title.strip():
+        clauses.append("lower_u(title) LIKE ? ESCAPE '\\'")
+        params.append(_like_pattern(title.strip()))
     sql = "SELECT * FROM tickets"
     if clauses:
         sql += " WHERE " + " AND ".join(clauses)

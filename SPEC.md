@@ -192,10 +192,11 @@ Devuelve la lista de tickets, ordenada por `created_at` descendente (y por `id`
 descendente a igualdad).
 
 **Query params opcionales** (combinables, filtran por igualdad exacta):
-`category`, `priority`, `status`.
+`category`, `priority`, `status` (igualdad exacta) y `title` (subcadena, sin
+distinguir mayúsculas; ver sección 7).
 
 ```text
-GET /tickets?category=bug&priority=P1&status=open
+GET /tickets?category=bug&priority=P1&status=open&title=login
 ```
 
 - **Response `200 OK`**: lista JSON de tickets (lista vacía `[]` si no hay).
@@ -348,6 +349,13 @@ Reglas:
   `<script>` en la descripción se muestra como texto.
 - No se exige diseño espectacular: la gracia es que sea funcional.
 
+Filtros:
+La tabla se podrá filtrar por
+- categoria
+- prioridad
+- estado
+- titulo: aplicando un filtro de tipo LIKE que ignore mayúsculas y minúsculas. El filtro será LIKE '%texto%'
+
 ---
 
 ## 8. Configuración y secretos
@@ -465,3 +473,6 @@ el README) con fecha y motivo. Ejemplo:
 | 2026-11-23 | En `GET /tickets`, un filtro vacío (`?status=`) equivale a "sin filtro"; un valor fuera del enum da `422` | Los `<select>` envían `""` para la opción "Todos" |
 | 2026-11-23 | SQLite con `timeout=30` y `journal_mode=WAL` | 20 POST concurrentes sin errores de base de datos bloqueada (QA #10) |
 | 2026-11-23 | Workflow movido de `workflows/ci.yml` a `.github/workflows/ci.yml` | GitHub Actions solo lee esa ruta |
+| 2026-11-24 | Filtro `title` en `GET /tickets`: `LIKE '%texto%'` con `%`, `_` y `\` escapados (`ESCAPE '\'`), de modo que se buscan literalmente | Evitar que un `%` o `_` escrito por el usuario actúe como comodín |
+| 2026-11-24 | El filtro `title` compara con una función SQL `lower_u` (Python `str.lower`) registrada en cada conexión | El `LIKE` de SQLite solo ignora mayúsculas en ASCII; así `página` encuentra `PÁGINA` |
+| 2026-11-24 | `?title=` vacío o solo espacios equivale a "sin filtro" (nunca 422); en la UI el campo filtra al escribir con un retardo de 300 ms | Coherente con los demás filtros y evita una petición por tecla |

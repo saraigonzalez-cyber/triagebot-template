@@ -119,11 +119,13 @@ def list_tickets(
     category: str | None = None,
     priority: str | None = None,
     status: str | None = None,
+    title: str | None = None,
 ):
     tickets = db.list_tickets(
         category=parse_filter("category", category, Category),
         priority=parse_filter("priority", priority, Priority),
         status=parse_filter("status", status, Status),
+        title=title,
     )
     if is_htmx(request):
         return render_rows(request, tickets)

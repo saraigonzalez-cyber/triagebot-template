@@ -63,10 +63,15 @@
     <section class="mt-6">
       <form id="filters" class="flex flex-wrap gap-3"
             hx-get="/tickets"
-            hx-trigger="change"
+            hx-trigger="change, input changed delay:300ms from:find input[name=title]"
             hx-include="#filters"
             hx-target="#tickets-table-body"
             hx-swap="innerHTML">
+        <label class="grid gap-1 text-sm">
+          <span class="font-medium">Título</span>
+          <input type="search" name="title" placeholder="Buscar por título…"
+                 class="rounded border border-slate-300 bg-white px-2 py-1">
+        </label>
         <label class="grid gap-1 text-sm">
           <span class="font-medium">Categoría</span>
           <select name="category" class="rounded border border-slate-300 bg-white px-2 py-1">
