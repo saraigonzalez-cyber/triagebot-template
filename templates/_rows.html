@@ -43,9 +43,12 @@
     </select>
   </td>
   <td class="px-3 py-2 text-sm whitespace-nowrap text-slate-500">{{ ticket.created_at | fmt_date }}</td>
+  <td class="px-3 py-2 text-sm whitespace-nowrap">
+    <span class="rounded px-2 py-0.5 text-xs font-medium ring-1 {{ priority_colors.get(ticket.priority, '') }}">{{ ticket.created_at | fmt_deadline(ticket.priority) }}</span>
+  </td>
 </tr>
 {% else %}
 <tr>
-  <td colspan="7" class="px-3 py-6 text-center text-sm text-slate-500">No hay tickets</td>
+  <td colspan="8" class="px-3 py-6 text-center text-sm text-slate-500">No hay tickets</td>
 </tr>
 {% endfor %}
