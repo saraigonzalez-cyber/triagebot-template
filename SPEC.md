@@ -330,7 +330,8 @@ contener:
      formulario, no un JSON crudo.
 2. **Tablero** con la lista de tickets, mostrando: `id`, `title`, `category`
    (color según valor), `priority` (badge: P1 rojo, P2 ámbar, P3 gris), `tags`
-   (chips), `status`, `created_at` (formato `dd/mm/aaaa hh:mm`).
+   (chips), `status`, `created_at` (formato `dd/mm/aaaa hh:mm`), `fecha_limite` (formato `dd/mm/aaaa hh:mm`).
+   
 3. **Filtros**: tres `<select>` (`category` / `priority` / `status`), cada uno
    con una opción "Todos". Al cambiar cualquiera, HTMX hace
    `GET /tickets?…` con los tres valores (`hx-include`) y reemplaza solo las

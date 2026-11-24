@@ -6,7 +6,7 @@ Aquí no hay SQL (vive en app.db) ni llamadas al LLM (viven en app.classifier).
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
 
@@ -35,7 +35,20 @@ def format_datetime(value: str) -> str:
         return value or ""
 
 
+DEADLINE_DAYS = {"P1": 1, "P2": 2, "P3": 3}
+
+
+def format_deadline(created_at: str, priority: str) -> str:
+    """Fecha límite = created_at + 1/2/3 días según P1/P2/P3 (SPEC §7)."""
+    try:
+        created = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
+        return (created + timedelta(days=DEADLINE_DAYS[priority])).strftime("%d/%m/%Y %H:%M")
+    except (TypeError, ValueError, KeyError):
+        return ""
+
+
 templates.env.filters["fmt_date"] = format_datetime
+templates.env.filters["fmt_deadline"] = format_deadline
 
 
 @asynccontextmanager
