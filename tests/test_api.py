@@ -149,10 +149,28 @@ def test_patch_updates_updated_at_only_allowed_fields(client):
     assert data["created_at"] == ticket["created_at"]
 
 
+def test_waiting_response_status_can_be_set_and_filtered(client):
+    ticket = create(client, "Pendiente del cliente")
+    create(client, "Otro")
+    patched = client.patch(f"/tickets/{ticket['id']}", json={"status": "waiting_response"})
+    assert patched.status_code == 200
+    assert patched.json()["status"] == "waiting_response"
+    assert titles(client, status="waiting_response") == ["Pendiente del cliente"]
+
+
+def test_board_shows_spanish_status_labels(client):
+    create(client)
+    html = client.get("/").text
+    for label in ("Abierto", "En curso", "A la espera de respuesta", "Cerrado"):
+        assert label in html
+    assert 'value="waiting_response"' in html
+
+
 @pytest.mark.parametrize(
     "body",
     [
         {"status": "inventado"},
+        {"status": "A la espera de respuesta"},
         {"priority": "P9"},
         {},
         {"title": "nuevo"},

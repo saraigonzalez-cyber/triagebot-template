@@ -22,7 +22,17 @@ class Priority(str, Enum):
 class Status(str, Enum):
     open = "open"
     in_progress = "in_progress"
+    waiting_response = "waiting_response"
     closed = "closed"
+
+
+# Etiquetas que ve el usuario (BRIEF, "Ciclo de vida"). La API usa siempre los valores.
+STATUS_LABELS = {
+    Status.open.value: "Abierto",
+    Status.in_progress.value: "En curso",
+    Status.waiting_response.value: "A la espera de respuesta",
+    Status.closed.value: "Cerrado",
+}
 
 
 ALLOWED_CATEGORIES = {c.value for c in Category}

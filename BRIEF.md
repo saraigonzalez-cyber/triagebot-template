@@ -73,6 +73,9 @@ Sabremos que está terminado cuando:
 - Los 5 tests obligatorios estén verdes.
 - El pipeline de GitHub Actions esté verde.
 
+## Ciclo de vida
+Los estados de ún ticket serán : Abierto, En curso, Cerrado y A la espera de respuesta
+
 ## Fuera de alcance
 
 No hace falta:
