@@ -360,6 +360,7 @@ contener:
    etiquetas en español del ciclo de vida (sección 4).
 5. **Estado vacío**: si no hay tickets (o el filtro no devuelve nada), una fila
    con "No hay tickets".
+6. **Estilo**: Dar a la web un estilo oscuro y siniestro
 
 Reglas:
 
@@ -500,3 +501,4 @@ el README) con fecha y motivo. Ejemplo:
 | 2026-11-24 | Nuevo estado `waiting_response` ("A la espera de respuesta"); etiquetas en español centralizadas en `STATUS_LABELS` y usadas también en el filtro | El cliente lo pide en el ciclo de vida del `BRIEF.md`; los valores siguen en inglés como el resto de enums para no romper la API ni los tests |
 | 2026-11-24 | Transiciones de estado libres, sin máquina de estados | El brief no define reglas de transición; se puede añadir si el cliente lo pide |
 | 2026-11-24 | Botón "Crear ticket" rojo con letra `green-300`; el azul claro (`sky-100`) se aplica al recuadro del formulario | La spec lo describe de forma ambigua (rojo y azul claro a la vez) y el verde oscuro sobre rojo no se lee |
+| 2026-11-24 | Tema oscuro y siniestro (§7.6) en toda la UI: fondo negro con viñeta rojo sangre, título con fuente `Creepster` (Google Fonts), tabla, filtros y badges en tonos oscuros manteniendo el código de color (P1 rojo, P2 ámbar, P3 gris). El recuadro del formulario también pasa a oscuro (deja sin efecto el azul claro del §7.1 y de la decisión anterior); el botón sigue rojo con letra verde | Coherencia visual con el §7.6; un recuadro azul claro rompía el tema oscuro |
