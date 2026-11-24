@@ -9,7 +9,6 @@
   "P2": "bg-amber-100 text-amber-800 ring-amber-300",
   "P3": "bg-slate-100 text-slate-700 ring-slate-300",
 } -%}
-{%- set status_labels = {"open": "Abierto", "in_progress": "En curso", "closed": "Cerrado"} -%}
 {% for ticket in tickets %}
 <tr id="ticket-{{ ticket.id }}" class="border-t border-slate-100 align-top hover:bg-slate-50">
   <td class="px-3 py-2 text-sm text-slate-500">#{{ ticket.id }}</td>
@@ -45,6 +44,9 @@
   </td>
   <td class="px-3 py-2 text-sm whitespace-nowrap text-slate-500">{{ ticket.created_at | fmt_date }}</td>
   <td class="px-3 py-2 text-sm whitespace-nowrap text-slate-500">{{ ticket.updated_at | fmt_date }}</td>
+  <td class="px-3 py-2 text-sm whitespace-nowrap">
+    <span class="rounded px-2 py-0.5 text-xs font-medium ring-1 {{ priority_colors.get(ticket.priority, '') }}">{{ ticket.created_at | fmt_deadline(ticket.priority) }}</span>
+  </td>
 </tr>
 {% else %}
 <tr>

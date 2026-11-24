@@ -6,7 +6,7 @@ Aquí no hay SQL (vive en app.db) ni llamadas al LLM (viven en app.classifier).
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
 
@@ -19,7 +19,15 @@ from fastapi.templating import Jinja2Templates  # noqa: E402
 
 # El clasificador se usa a través del módulo para que los tests puedan sustituirlo.
 from app import classifier, db  # noqa: E402
-from app.models import Category, Priority, Status, Ticket, TicketCreate, TicketUpdate  # noqa: E402
+from app.models import (  # noqa: E402
+    STATUS_LABELS,
+    Category,
+    Priority,
+    Status,
+    Ticket,
+    TicketCreate,
+    TicketUpdate,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +43,20 @@ def format_datetime(value: str) -> str:
         return value or ""
 
 
+DEADLINE_DAYS = {"P1": 1, "P2": 2, "P3": 3}
+
+
+def format_deadline(created_at: str, priority: str) -> str:
+    """Fecha límite = created_at + 1/2/3 días según P1/P2/P3 (SPEC §7)."""
+    try:
+        created = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ")
+        return (created + timedelta(days=DEADLINE_DAYS[priority])).strftime("%d/%m/%Y %H:%M")
+    except (TypeError, ValueError, KeyError):
+        return ""
+
+
 templates.env.filters["fmt_date"] = format_datetime
+templates.env.filters["fmt_deadline"] = format_deadline
 
 
 @asynccontextmanager
@@ -50,6 +71,7 @@ TEMPLATE_CONTEXT = {
     "categories": [c.value for c in Category],
     "priorities": [p.value for p in Priority],
     "statuses": [s.value for s in Status],
+    "status_labels": STATUS_LABELS,
 }
 
 

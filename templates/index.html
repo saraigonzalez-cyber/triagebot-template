@@ -90,7 +90,7 @@
           <span class="font-medium">Estado</span>
           <select name="status" class="rounded border border-slate-300 bg-white px-2 py-1">
             <option value="">Todos</option>
-            {% for s in statuses %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+            {% for s in statuses %}<option value="{{ s }}">{{ status_labels.get(s, s) }}</option>{% endfor %}
           </select>
         </label>
       </form>

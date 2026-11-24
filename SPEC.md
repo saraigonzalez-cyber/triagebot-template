@@ -99,7 +99,7 @@ Una sola entidad: `Ticket`.
 | `category` | str | Uno de: `bug`, `feature_request`, `question`, `urgent` |
 | `priority` | str | Uno de: `P1`, `P2`, `P3` |
 | `tags` | list[str] | Lista (puede estar vacía). Máx. 5 tags, cada uno máx. 30 chars, en minúscula y sin duplicados |
-| `status` | str | Uno de: `open`, `in_progress`, `closed`. Default: `open` |
+| `status` | str | Uno de: `open`, `in_progress`, `waiting_response`, `closed`. Default: `open` (ver "Ciclo de vida") |
 | `created_at` | datetime | UTC, generado en servidor |
 | `updated_at` | datetime | UTC. Igual a `created_at` al crear; se actualiza en cada `PATCH` |
 
@@ -108,6 +108,24 @@ momento de crear el ticket.
 
 > **Los enums son vinculantes.** Si vuestro código devuelve `"URGENT"` en
 > mayúsculas o un valor fuera de la lista, los tests fallan.
+
+### Ciclo de vida (estados)
+
+Estados pedidos por el cliente en `BRIEF.md`. La API y la base de datos usan
+siempre el **valor**; la interfaz muestra siempre la **etiqueta**.
+
+| Valor (API / BD) | Etiqueta en la UI | Significado |
+|------------------|-------------------|-------------|
+| `open` | Abierto | Recién creado, nadie lo ha cogido. Estado inicial. |
+| `in_progress` | En curso | Un técnico está trabajando en él. |
+| `waiting_response` | A la espera de respuesta | Bloqueado hasta que responda el cliente. |
+| `closed` | Cerrado | Resuelto. |
+
+- Las transiciones son **libres**: desde la tabla se puede pasar de cualquier
+  estado a cualquier otro (también reabrir un cerrado).
+- Las etiquetas se definen en un único sitio (`STATUS_LABELS` en `app/models.py`)
+  y las usan tanto el `<select>` de cada fila como el filtro de estado.
+- Enviar la etiqueta en vez del valor (`{"status": "Cerrado"}`) da `422`.
 
 ### Esquema SQLite
 
@@ -331,13 +349,15 @@ contener:
      formulario, no un JSON crudo.
 2. **Tablero** con la lista de tickets, mostrando: `id`, `title`, `category`
    (color según valor), `priority` (badge: P1 rojo, P2 ámbar, P3 gris), `tags`
-   (chips), `status`, `created_at` (formato `dd/mm/aaaa hh:mm`), `updated_at` (formato `dd/mm/aaaa hh:mm`).
+   (chips), `status`, `created_at` (formato `dd/mm/aaaa hh:mm`), `fecha_limite` (formato `dd/mm/aaaa hh:mm`), `updated_at` (formato `dd/mm/aaaa hh:mm`).
+   
 3. **Filtros**: tres `<select>` (`category` / `priority` / `status`), cada uno
    con una opción "Todos". Al cambiar cualquiera, HTMX hace
    `GET /tickets?…` con los tres valores (`hx-include`) y reemplaza solo las
    filas.
 4. **Cambio de estado** desde la tabla: un `<select>` de `status` por fila que
-   hace `PATCH /tickets/{id}` y refresca la fila.
+   hace `PATCH /tickets/{id}` y refresca la fila. Las opciones muestran las
+   etiquetas en español del ciclo de vida (sección 4).
 5. **Estado vacío**: si no hay tickets (o el filtro no devuelve nada), una fila
    con "No hay tickets".
 
@@ -477,4 +497,6 @@ el README) con fecha y motivo. Ejemplo:
 | 2026-11-24 | Filtro `title` en `GET /tickets`: `LIKE '%texto%'` con `%`, `_` y `\` escapados (`ESCAPE '\'`), de modo que se buscan literalmente | Evitar que un `%` o `_` escrito por el usuario actúe como comodín |
 | 2026-11-24 | El filtro `title` compara con una función SQL `lower_u` (Python `str.lower`) registrada en cada conexión | El `LIKE` de SQLite solo ignora mayúsculas en ASCII; así `página` encuentra `PÁGINA` |
 | 2026-11-24 | `?title=` vacío o solo espacios equivale a "sin filtro" (nunca 422); en la UI el campo filtra al escribir con un retardo de 300 ms | Coherente con los demás filtros y evita una petición por tecla |
+| 2026-11-24 | Nuevo estado `waiting_response` ("A la espera de respuesta"); etiquetas en español centralizadas en `STATUS_LABELS` y usadas también en el filtro | El cliente lo pide en el ciclo de vida del `BRIEF.md`; los valores siguen en inglés como el resto de enums para no romper la API ni los tests |
+| 2026-11-24 | Transiciones de estado libres, sin máquina de estados | El brief no define reglas de transición; se puede añadir si el cliente lo pide |
 | 2026-11-24 | Botón "Crear ticket" rojo con letra `green-300`; el azul claro (`sky-100`) se aplica al recuadro del formulario | La spec lo describe de forma ambigua (rojo y azul claro a la vez) y el verde oscuro sobre rojo no se lee |
