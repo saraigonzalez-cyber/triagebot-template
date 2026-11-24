@@ -1,18 +1,19 @@
-<div class="overflow-x-auto">
-<table class="min-w-full divide-y divide-slate-200 bg-white shadow-sm ring-1 ring-slate-200 rounded-lg overflow-hidden">
-  <thead class="bg-slate-100">
-    <tr>
-      <th class="px-3 py-2 text-left text-sm font-semibold">ID</th>
-      <th class="px-3 py-2 text-left text-sm font-semibold">Título</th>
-      <th class="px-3 py-2 text-left text-sm font-semibold">Categoría</th>
-      <th class="px-3 py-2 text-left text-sm font-semibold">Prioridad</th>
-      <th class="px-3 py-2 text-left text-sm font-semibold">Tags</th>
-      <th class="px-3 py-2 text-left text-sm font-semibold">Estado</th>
-      <th class="px-3 py-2 text-left text-sm font-semibold">Creado</th>
-    </tr>
-  </thead>
-  <tbody id="tickets-table-body">
-    {% include "_rows.html" %}
-  </tbody>
-</table>
+<div class="overflow-x-auto rounded-lg bg-white shadow-sm ring-1 ring-slate-200">
+  <table class="min-w-full divide-y divide-slate-200 text-sm">
+    <thead class="bg-slate-100 text-left text-xs font-semibold uppercase text-slate-600">
+      <tr>
+        <th class="px-3 py-2">ID</th>
+        <th class="px-3 py-2">Título</th>
+        <th class="px-3 py-2">Categoría</th>
+        <th class="px-3 py-2">Prioridad</th>
+        <th class="px-3 py-2">Tags</th>
+        <th class="px-3 py-2">Estado</th>
+        <th class="px-3 py-2">Creado</th>
+        <th class="px-3 py-2">Actualizado</th>
+      </tr>
+    </thead>
+    <tbody id="tickets-table-body" class="divide-y divide-slate-100">
+      {% include "_rows.html" %}
+    </tbody>
+  </table>
 </div>

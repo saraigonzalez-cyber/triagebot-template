@@ -329,7 +329,7 @@ contener:
      formulario, no un JSON crudo.
 2. **Tablero** con la lista de tickets, mostrando: `id`, `title`, `category`
    (color según valor), `priority` (badge: P1 rojo, P2 ámbar, P3 gris), `tags`
-   (chips), `status`, `created_at` (formato `dd/mm/aaaa hh:mm`).
+   (chips), `status`, `created_at` (formato `dd/mm/aaaa hh:mm`),  `updated_at` (formato `dd/mm/aaaa hh:mm`).
 3. **Filtros**: tres `<select>` (`category` / `priority` / `status`), cada uno
    con una opción "Todos". Al cambiar cualquiera, HTMX hace
    `GET /tickets?…` con los tres valores (`hx-include`) y reemplaza solo las
@@ -465,3 +465,4 @@ el README) con fecha y motivo. Ejemplo:
 | 2026-11-23 | En `GET /tickets`, un filtro vacío (`?status=`) equivale a "sin filtro"; un valor fuera del enum da `422` | Los `<select>` envían `""` para la opción "Todos" |
 | 2026-11-23 | SQLite con `timeout=30` y `journal_mode=WAL` | 20 POST concurrentes sin errores de base de datos bloqueada (QA #10) |
 | 2026-11-23 | Workflow movido de `workflows/ci.yml` a `.github/workflows/ci.yml` | GitHub Actions solo lee esa ruta |
+| 2026-11-24 | El tablero muestra `updated_at` además de `created_at`, ambos en `dd/mm/aaaa hh:mm` (filtro Jinja `fmt_date`, en `main.py`) | Ver cuándo se cambió `status`/`priority` por `PATCH` |
