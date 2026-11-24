@@ -317,7 +317,8 @@ Una sola página HTML servida en `GET /` con `templates/index.html`. Debe
 contener:
 
 1. **Formulario** con dos campos (`title`, `description`) y un botón "Crear
-   ticket".
+   ticket" de color rojo.
+   Letra de color verde y fondo azul claro
    - Envío con HTMX: `hx-post="/tickets"`, `hx-ext="json-enc"` (la extensión
      json-enc de HTMX, por CDN, para enviar JSON y reutilizar el mismo
      endpoint que usan los tests), `hx-target` = cuerpo de la tabla.
@@ -465,3 +466,4 @@ el README) con fecha y motivo. Ejemplo:
 | 2026-11-23 | En `GET /tickets`, un filtro vacío (`?status=`) equivale a "sin filtro"; un valor fuera del enum da `422` | Los `<select>` envían `""` para la opción "Todos" |
 | 2026-11-23 | SQLite con `timeout=30` y `journal_mode=WAL` | 20 POST concurrentes sin errores de base de datos bloqueada (QA #10) |
 | 2026-11-23 | Workflow movido de `workflows/ci.yml` a `.github/workflows/ci.yml` | GitHub Actions solo lee esa ruta |
+| 2026-11-24 | Botón "Crear ticket" rojo con letra `green-300`; el azul claro (`sky-100`) se aplica al recuadro del formulario | La spec lo describe de forma ambigua (rojo y azul claro a la vez) y el verde oscuro sobre rojo no se lee |
