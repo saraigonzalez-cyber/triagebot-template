@@ -19,7 +19,15 @@ from fastapi.templating import Jinja2Templates  # noqa: E402
 
 # El clasificador se usa a través del módulo para que los tests puedan sustituirlo.
 from app import classifier, db  # noqa: E402
-from app.models import Category, Priority, Status, Ticket, TicketCreate, TicketUpdate  # noqa: E402
+from app.models import (  # noqa: E402
+    STATUS_LABELS,
+    Category,
+    Priority,
+    Status,
+    Ticket,
+    TicketCreate,
+    TicketUpdate,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +58,7 @@ TEMPLATE_CONTEXT = {
     "categories": [c.value for c in Category],
     "priorities": [p.value for p in Priority],
     "statuses": [s.value for s in Status],
+    "status_labels": STATUS_LABELS,
 }
 
 
