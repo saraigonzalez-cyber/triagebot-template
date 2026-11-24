@@ -102,6 +102,15 @@ class Ticket(BaseModel):
     updated_at: str
 
 
+class TicketStats(BaseModel):
+    """Salida de GET /tickets/stats. Claves = valores del enum, con 0 si no hay tickets."""
+
+    total: int
+    by_category: dict[str, int]
+    by_priority: dict[str, int]
+    by_status: dict[str, int]
+
+
 def normalize_tags(raw: list[Any]) -> list[str]:
     """Minúscula, strip, recorte a 30 chars, sin vacíos ni duplicados, máx. 5."""
     tags: list[str] = []

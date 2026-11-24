@@ -236,3 +236,28 @@ def test_htmx_requests_return_html_rows(client):
 
 def test_health(client):
     assert client.get("/health").json() == {"status": "ok"}
+
+
+def test_stats_empty_db_returns_all_keys_with_zero(client):
+    response = client.get("/tickets/stats")
+    assert response.status_code == 200
+    assert response.json() == {
+        "total": 0,
+        "by_category": {"bug": 0, "feature_request": 0, "question": 0, "urgent": 0},
+        "by_priority": {"P1": 0, "P2": 0, "P3": 0},
+        "by_status": {"open": 0, "in_progress": 0, "waiting_response": 0, "closed": 0},
+    }
+
+
+def test_stats_counts_by_category_priority_and_status(client):
+    create(client, "Uno")
+    second = create(client, "Dos")
+    patch = client.patch(f"/tickets/{second['id']}", json={"status": "closed", "priority": "P3"})
+    assert patch.status_code == 200
+
+    stats = client.get("/tickets/stats").json()
+    assert stats["total"] == 2
+    assert stats["by_category"]["bug"] == 2
+    assert stats["by_priority"] == {"P1": 1, "P2": 0, "P3": 1}
+    assert stats["by_status"]["open"] == 1
+    assert stats["by_status"]["closed"] == 1

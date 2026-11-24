@@ -248,6 +248,21 @@ tras la creación.
 Renderiza `index.html` con el tablero (sección 7). **Devuelve HTML, no JSON**
 — no confundir con `GET /tickets`.
 
+
+### `GET /tickets/stats`
+
+- **Response `200 OK`**: Devolver json con cuantos tickets tenemos por categoria, prioridad y estado.
+  Aparecen siempre todos los valores de cada enum (con `0` si no hay tickets):
+
+```json
+{
+  "total": 7,
+  "by_category": {"bug": 3, "feature_request": 1, "question": 2, "urgent": 1},
+  "by_priority": {"P1": 2, "P2": 3, "P3": 2},
+  "by_status": {"open": 4, "in_progress": 1, "waiting_response": 0, "closed": 2}
+}
+```
+
 ---
 
 ## 6. El módulo clasificador (`app/classifier.py`)
@@ -429,6 +444,18 @@ Ningún test propio llama al LLM real.
 
 `pytest --cov=app` debe ejecutarse sin errores; objetivo orientativo ≥ 70 %.
 
+### 9.4 Pruebas Adicionales:
+Testear las siguientes casuisticas no den error:
+- Title vacío o solo espacios
+- Title de 5000 caracteres
+- Emojis y caracteres unicode no latinos
+- HTML/JS en la descripción (XSS potencial)
+- Inyección SQL básica
+- LLM caído
+- Mismo ticket enviado dos veces seguidas
+- IDs malformados (-1, abc, 99999999999)
+- PATCH con valores inválidos (status: "inventado")
+- 20 POSTs concurrentes
 ---
 
 ## 10. Comportamiento esperado ante el checklist de QA adversarial (Día 2, Lab 5)
@@ -502,6 +529,7 @@ el README) con fecha y motivo. Ejemplo:
 | 2026-11-24 | Transiciones de estado libres, sin máquina de estados | El brief no define reglas de transición; se puede añadir si el cliente lo pide |
 | 2026-11-24 | Botón "Crear ticket" rojo con letra `green-300`; el azul claro (`sky-100`) se aplica al recuadro del formulario | La spec lo describe de forma ambigua (rojo y azul claro a la vez) y el verde oscuro sobre rojo no se lee |
 | 2026-11-24 | Tema oscuro y siniestro (§7.6) en toda la UI: fondo negro con viñeta rojo sangre, título con fuente `Creepster` (Google Fonts), tabla, filtros y badges en tonos oscuros manteniendo el código de color (P1 rojo, P2 ámbar, P3 gris). El recuadro del formulario también pasa a oscuro (deja sin efecto el azul claro del §7.1 y de la decisión anterior); el botón sigue rojo con letra verde | Coherencia visual con el §7.6; un recuadro azul claro rompía el tema oscuro |
+| 2026-11-24 | `GET /tickets/stats` devuelve `total` y `by_category` / `by_priority` / `by_status` con **todas** las claves del enum (valores de la API, no etiquetas) y `0` si no hay tickets; sin filtros ni HTMX. La ruta se declara antes de `/tickets/{id}` | Forma estable para quien la consuma; si se declarase después, FastAPI trataría `stats` como id y daría `422` |
 | 2026-11-24 | `title`/`description` rechazan NUL y surrogates sueltos (422); el 422 sanea el `input` del error | Evitar 500 al guardar y al serializar la respuesta de error |
 | 2026-11-24 | `GET`/`PATCH /tickets/{id}` con un id fuera del rango de enteros de SQLite devuelven 404 | §10.8: un entero inexistente es 404, nunca 500 |
 | 2026-11-24 | `POST /tickets` valida la salida del clasificador con `Classification` y aplica el fallback si no cumple el contrato | El endpoint nunca debe dar 5xx ni guardar categorías o prioridades inválidas |

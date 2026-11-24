@@ -30,6 +30,7 @@ from app.models import (  # noqa: E402
     Status,
     Ticket,
     TicketCreate,
+    TicketStats,
     TicketUpdate,
 )
 
@@ -173,6 +174,18 @@ def list_tickets(
     if is_htmx(request):
         return render_rows(request, tickets)
     return tickets
+
+
+# Debe declararse antes de /tickets/{ticket_id}: si no, "stats" se trataría como id (422).
+@app.get("/tickets/stats", response_model=TicketStats)
+def ticket_stats():
+    raw = db.ticket_stats()
+    return {
+        "total": raw["total"],
+        "by_category": {c.value: raw["category"].get(c.value, 0) for c in Category},
+        "by_priority": {p.value: raw["priority"].get(p.value, 0) for p in Priority},
+        "by_status": {s.value: raw["status"].get(s.value, 0) for s in Status},
+    }
 
 
 @app.get("/tickets/{ticket_id}", response_model=Ticket)

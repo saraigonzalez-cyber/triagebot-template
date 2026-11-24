@@ -134,6 +134,18 @@ def list_tickets(
     return [_row_to_dict(r) for r in rows]
 
 
+def ticket_stats() -> dict:
+    """Conteos por category, priority y status (solo valores presentes) y total."""
+    stats: dict = {}
+    with _connect() as conn:
+        stats["total"] = conn.execute("SELECT COUNT(*) FROM tickets").fetchone()[0]
+        for col in FILTER_COLUMNS:
+            # col sale de FILTER_COLUMNS (nombres fijos), nunca de datos del usuario.
+            rows = conn.execute(f"SELECT {col}, COUNT(*) FROM tickets GROUP BY {col}").fetchall()
+            stats[col] = {row[0]: row[1] for row in rows}
+    return stats
+
+
 def update_ticket(ticket_id: int, fields: dict) -> dict | None:
     if not -(2**63) <= ticket_id < 2**63:  # fuera del rango de SQLite: no puede existir
         return None
