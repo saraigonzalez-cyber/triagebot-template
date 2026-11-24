@@ -99,8 +99,11 @@ def insert_ticket(title: str, description: str, classification: dict) -> dict:
 
 
 def get_ticket(ticket_id: int) -> dict | None:
-    with _connect() as conn:
-        row = conn.execute("SELECT * FROM tickets WHERE id = ?", (ticket_id,)).fetchone()
+    try:
+        with _connect() as conn:
+            row = conn.execute("SELECT * FROM tickets WHERE id = ?", (ticket_id,)).fetchone()
+    except OverflowError:  # id fuera del rango de enteros de SQLite: no puede existir
+        return None
     return _row_to_dict(row) if row else None
 
 
@@ -132,6 +135,8 @@ def list_tickets(
 
 
 def update_ticket(ticket_id: int, fields: dict) -> dict | None:
+    if not -(2**63) <= ticket_id < 2**63:  # fuera del rango de SQLite: no puede existir
+        return None
     updates = {k: v for k, v in fields.items() if k in UPDATABLE_COLUMNS and v is not None}
     with _connect() as conn:
         if conn.execute("SELECT 1 FROM tickets WHERE id = ?", (ticket_id,)).fetchone() is None:
