@@ -3,7 +3,14 @@
 from enum import Enum
 from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, StringConstraints, field_validator, model_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    StringConstraints,
+    field_validator,
+    model_validator,
+)
 
 
 class Category(str, Enum):
@@ -42,9 +49,26 @@ ALLOWED_STATUSES = {s.value for s in Status}
 MAX_TAGS = 5
 MAX_TAG_LENGTH = 30
 
-Title = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
+def _reject_unstorable_chars(value: str) -> str:
+    """Rechaza NUL y surrogates sueltos (no codificables en UTF-8): darían 500 al guardar."""
+    if "\x00" in value:
+        raise ValueError("No se permite el carácter NUL")
+    try:
+        value.encode("utf-8")
+    except UnicodeEncodeError:
+        raise ValueError("Contiene caracteres Unicode no válidos") from None
+    return value
+
+
+Title = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, min_length=1, max_length=200),
+    AfterValidator(_reject_unstorable_chars),
+]
 Description = Annotated[
-    str, StringConstraints(strip_whitespace=True, min_length=1, max_length=5000)
+    str,
+    StringConstraints(strip_whitespace=True, min_length=1, max_length=5000),
+    AfterValidator(_reject_unstorable_chars),
 ]
 
 

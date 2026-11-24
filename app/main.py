@@ -15,6 +15,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI, HTTPException, Request, Response  # noqa: E402
+from fastapi.encoders import jsonable_encoder  # noqa: E402
+from fastapi.exceptions import RequestValidationError  # noqa: E402
+from fastapi.responses import JSONResponse  # noqa: E402
 from fastapi.templating import Jinja2Templates  # noqa: E402
 
 # El clasificador se usa a través del módulo para que los tests puedan sustituirlo.
@@ -22,6 +25,7 @@ from app import classifier, db  # noqa: E402
 from app.models import (  # noqa: E402
     STATUS_LABELS,
     Category,
+    Classification,
     Priority,
     Status,
     Ticket,
@@ -67,6 +71,20 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="TriageBot", lifespan=lifespan)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(_request: Request, exc: RequestValidationError):
+    """Mismo 422 estándar de FastAPI, pero con el `input` saneado.
+
+    Un surrogate suelto en el input no es codificable en UTF-8 y rompería la
+    propia respuesta de error (500).
+    """
+    errors = jsonable_encoder(exc.errors())
+    for err in errors:
+        if isinstance(err.get("input"), str):
+            err["input"] = err["input"].encode("utf-8", "replace").decode("utf-8")
+    return JSONResponse(status_code=422, content={"detail": errors})
 
 TEMPLATE_CONTEXT = {
     "categories": [c.value for c in Category],
@@ -125,7 +143,10 @@ def index(request: Request) -> Response:
 def create_ticket(payload: TicketCreate, request: Request):
     # Orden: validar (lo hace Pydantic antes de entrar) -> clasificar -> guardar -> responder.
     try:
-        classification = classifier.classify_ticket(payload.title, payload.description)
+        # Defensa en profundidad: si el resultado no cumple el contrato, fallback.
+        classification = Classification.model_validate(
+            classifier.classify_ticket(payload.title, payload.description)
+        ).to_dict()
     except Exception as exc:
         logger.warning("Clasificador lanzó %s; se usa el fallback", type(exc).__name__)
         classification = classifier.fallback()
