@@ -318,7 +318,8 @@ Una sola página HTML servida en `GET /` con `templates/index.html`. Debe
 contener:
 
 1. **Formulario** con dos campos (`title`, `description`) y un botón "Crear
-   ticket".
+   ticket" de color rojo.
+   Letra de color verde y fondo azul claro
    - Envío con HTMX: `hx-post="/tickets"`, `hx-ext="json-enc"` (la extensión
      json-enc de HTMX, por CDN, para enviar JSON y reutilizar el mismo
      endpoint que usan los tests), `hx-target` = cuerpo de la tabla.
@@ -476,3 +477,4 @@ el README) con fecha y motivo. Ejemplo:
 | 2026-11-24 | Filtro `title` en `GET /tickets`: `LIKE '%texto%'` con `%`, `_` y `\` escapados (`ESCAPE '\'`), de modo que se buscan literalmente | Evitar que un `%` o `_` escrito por el usuario actúe como comodín |
 | 2026-11-24 | El filtro `title` compara con una función SQL `lower_u` (Python `str.lower`) registrada en cada conexión | El `LIKE` de SQLite solo ignora mayúsculas en ASCII; así `página` encuentra `PÁGINA` |
 | 2026-11-24 | `?title=` vacío o solo espacios equivale a "sin filtro" (nunca 422); en la UI el campo filtra al escribir con un retardo de 300 ms | Coherente con los demás filtros y evita una petición por tecla |
+| 2026-11-24 | Botón "Crear ticket" rojo con letra `green-300`; el azul claro (`sky-100`) se aplica al recuadro del formulario | La spec lo describe de forma ambigua (rojo y azul claro a la vez) y el verde oscuro sobre rojo no se lee |
