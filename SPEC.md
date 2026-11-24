@@ -376,6 +376,7 @@ contener:
 5. **Estado vacío**: si no hay tickets (o el filtro no devuelve nada), una fila
    con "No hay tickets".
 6. **Estilo**: Dar a la web un estilo oscuro y siniestro
+7. **BotonGetTicketList**: Añadir boton que llame al endpoint GET /tickets/stats
 
 Reglas:
 
@@ -529,7 +530,5 @@ el README) con fecha y motivo. Ejemplo:
 | 2026-11-24 | Transiciones de estado libres, sin máquina de estados | El brief no define reglas de transición; se puede añadir si el cliente lo pide |
 | 2026-11-24 | Botón "Crear ticket" rojo con letra `green-300`; el azul claro (`sky-100`) se aplica al recuadro del formulario | La spec lo describe de forma ambigua (rojo y azul claro a la vez) y el verde oscuro sobre rojo no se lee |
 | 2026-11-24 | Tema oscuro y siniestro (§7.6) en toda la UI: fondo negro con viñeta rojo sangre, título con fuente `Creepster` (Google Fonts), tabla, filtros y badges en tonos oscuros manteniendo el código de color (P1 rojo, P2 ámbar, P3 gris). El recuadro del formulario también pasa a oscuro (deja sin efecto el azul claro del §7.1 y de la decisión anterior); el botón sigue rojo con letra verde | Coherencia visual con el §7.6; un recuadro azul claro rompía el tema oscuro |
-| 2026-11-24 | `GET /tickets/stats` devuelve `total` y `by_category` / `by_priority` / `by_status` con **todas** las claves del enum (valores de la API, no etiquetas) y `0` si no hay tickets; sin filtros ni HTMX. La ruta se declara antes de `/tickets/{id}` | Forma estable para quien la consuma; si se declarase después, FastAPI trataría `stats` como id y daría `422` |
-| 2026-11-24 | `title`/`description` rechazan NUL y surrogates sueltos (422); el 422 sanea el `input` del error | Evitar 500 al guardar y al serializar la respuesta de error |
-| 2026-11-24 | `GET`/`PATCH /tickets/{id}` con un id fuera del rango de enteros de SQLite devuelven 404 | §10.8: un entero inexistente es 404, nunca 500 |
-| 2026-11-24 | `POST /tickets` valida la salida del clasificador con `Classification` y aplica el fallback si no cumple el contrato | El endpoint nunca debe dar 5xx ni guardar categorías o prioridades inválidas |
+| 2026-11-24 | `GET /tickets/stats` devuelve `total` y `by_category` / `by_priority` / `by_status` con **todas** las claves del enum (valores de la API, no etiquetas) y `0` si no hay tickets; sin filtros (con `HX-Request` devuelve HTML, ver fila siguiente). La ruta se declara antes de `/tickets/{id}` | Forma estable para quien la consuma; si se declarase después, FastAPI trataría `stats` como id y daría `422` |
+| 2026-11-24 | `GET /tickets/stats` devuelve un parcial HTML (`_stats.html`) si la petición trae `HX-Request`, y JSON en otro caso | El botón de estadísticas (sección 7.7) reutiliza el endpoint con HTMX, igual que `GET /tickets` |
